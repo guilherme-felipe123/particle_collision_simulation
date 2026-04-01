@@ -2,7 +2,7 @@
 
 ## 📌 Overview
 
-This project simulates particle collisions and applies a deep learning model to reconstruct information from noisy detector data — inspired by real-world high-energy physics experiments.
+This project implements an end-to-end machine learning system for real-time particle collision reconstruction, combining simulation, model inference, and API-based deployment in a distributed architecture.
 
 The system mimics, in a simplified way, how experiments like those at CERN infer what truly happened during a collision using imperfect observations.
 
@@ -69,6 +69,8 @@ Pygame Simulation  →  FastAPI Service  →  PyTorch Model
 
 ### 🌐 API (FastAPI)
 
+The trained model is deployed as a REST API using FastAPI. The service loads the model at startup and exposes a /predict endpoint for real-time inference, enabling decoupled communication between the simulation client and the ML model.
+
 * The trained model is served via a REST API
 * Endpoint: `/predict`
 * Receives particle features and returns predictions
@@ -97,6 +99,18 @@ Example request:
 * FastAPI
 * Docker
 * Pygame (visualization)
+
+---
+
+## 🚢 Deployment
+
+The application is containerized using Docker to ensure reproducibility and portability across environments.
+
+- Encapsulates simulation, model, and API dependencies
+- Enables consistent execution across systems
+- Supports local development and potential cloud deployment
+
+The API service can be deployed independently, enabling scalable ML inference.
 
 ---
 
@@ -192,6 +206,5 @@ docker run -it \
 * Integrating **real-time systems with machine learning**
 * Debugging **client-server data contracts (422 errors, schema mismatches)**
 
----
 
 
