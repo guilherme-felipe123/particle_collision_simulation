@@ -92,16 +92,6 @@ Example request:
 
 ---
 
-## 🛠️ Tech Stack
-
-* Python
-* PyTorch
-* FastAPI
-* Docker
-* Pygame (visualization)
-
----
-
 ## 🚢 Deployment
 
 The application is containerized using Docker to ensure reproducibility and portability across environments.
@@ -111,6 +101,16 @@ The application is containerized using Docker to ensure reproducibility and port
 - Supports local development and potential cloud deployment
 
 The API service can be deployed independently, enabling scalable ML inference.
+
+---
+
+## 🛠️ Tech Stack
+
+* Python
+* PyTorch
+* FastAPI
+* Docker
+* Pygame (visualization)
 
 ---
 
