@@ -2,6 +2,7 @@ import math
 import torch
 import pygame
 import random
+import requests
 import itertools
 
 from particle import Particle
@@ -13,6 +14,19 @@ from ml.deepset_model import DeepSetModel
 from ml.preprocess import extract_features
 
 
+
+
+def get_prediction(particles):
+    url = "http://localhost:8000/predict"
+
+    response = requests.post(url, json={
+        "particles": particles
+    })
+
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.text)
+
+    return response.json()["predicted_particles"]
 
 def get_speed(p):
     return math.hypot(p.vx, p.vy)
@@ -47,12 +61,6 @@ frame_count = 0
 writer = DatasetWriter()
 
 #main()
-
-model = DeepSetModel()
-model.load_state_dict(torch.load("/app/ml/model.pth"))
-model.eval()
-print("Model loaded!")
-print(next(model.parameters()).mean())
 
 while running:
     screen.fill((0, 0, 0))
@@ -126,34 +134,20 @@ while running:
                 # prepare input for model
                 measured_particles = measured_event["particles"]
 
-                #x = extract_features(measured_event)
 
-                # convert to tensor
                 x = [[p["px"], p["py"], p["energy"]] for p in measured_particles]
-                x_tensor = torch.tensor(x, dtype=torch.float).unsqueeze(0)  # (1, n, 3)
 
+                # call API
+                print("X Contents: ",x)
+                prediction = get_prediction(x)
 
-
-                with torch.no_grad():
-                    pred = model(x_tensor)
-
-                print("Model input:", x)
-                print("Prediction raw:", pred.item())
-                
-                pred_particles = pred.item() * 20
+                pred_particles = prediction * 20
                 pred_particles = max(0, min(pred_particles, 20))
-
-                writer.save_event(true_event, measured_event)
 
                 true_n = true_event["n_particles"]
 
                 print(f"TRUE: {true_n}")
                 print(f"PREDICTED: {pred_particles:.2f}")
-
-                
-
-                #print("TRUE:", true_event)
-                #print("MEASURED:", measured_event)
 
                 break
 
