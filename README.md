@@ -104,6 +104,18 @@ The API service can be deployed independently, enabling scalable ML inference.
 
 ---
 
+## 🔄 CI/CD
+
+A GitHub Actions pipeline is used to:
+
+- Validate code on each push
+- Install dependencies automatically
+- Build the Docker image for deployment
+
+This ensures reproducibility and early detection of integration issues.
+
+---
+
 ## 🛠️ Tech Stack
 
 * Python
