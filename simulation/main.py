@@ -111,6 +111,10 @@ event_active = False
 
 frame_count = 0
 
+total_error = 0
+num_events = 0
+
+baseline = 8  # average number of particles
 
 while running:
     screen.fill((0, 0, 0))
@@ -153,11 +157,26 @@ while running:
                 break
 
     error = abs(true_n - pred_particles)
+    baseline_error = abs(true_n - baseline)
+    status = "Good" if error < baseline_error else "Bad"
+    diff = baseline_error - error
+
+    if diff > 2:
+        color = (0, 255, 0)      # strong win
+    elif diff > 0:
+        color = (200, 255, 0)    # slight win
+    else:
+        color = (255, 0, 0)      # loss
+    
+    total_error += error
+    num_events += 1
+
+    avg_error = total_error / num_events if num_events > 0 else 0
 
     text = font.render(
-        f"True: {true_n} | Pred: {pred_particles:.2f} | Err: {error:.2f}",
+        f"True: {true_n} | Pred: {pred_particles:.2f} | Err: {error:.2f} | Avg: {avg_error:.2f} | Base Err: {baseline_error:.2f} | {status}",
         True,
-        (255, 255, 255)
+        color
     )
 
     screen.blit(text, (20, 20))
