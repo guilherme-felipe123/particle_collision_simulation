@@ -128,64 +128,29 @@ This ensures reproducibility and early detection of integration issues.
 
 ## 🚀 How to run
 
-### 1. Build Docker image
+### 🔹 Automatic Setup
+
+Run the provided script:
 
 ```bash
-docker build -t particle-sim .
+chmod +x run_app.sh
+./run_app.sh
 ```
 
----
+This script will:
 
-### 2. Generate Some Data
+- Build the Docker image (if not already built)
+    
+- Generate the dataset (if missing)
+    
+- Train the model (if missing)
+    
+- Start the FastAPI service
+    
+- Launch the particle simulation
 
-```bash
-docker run -it \
-  --env PYTHONPATH=/app \
-  --volume $(pwd):/app \
-  particle-sim \
-  python simulation/generate_data.py
-```
 
----
-
-### 3. Train the model
-
-```bash
-docker run -it \
-  --env PYTHONPATH=/app \
-  --volume $(pwd):/app \
-  particle-sim \
-  python ml/train.py
-```
-
----
-
-### 4. Run API
-
-```bash
-docker run -it \
-  --env PYTHONPATH=/app \
-  --volume $(pwd):/app \
-  -p 8000:8000 \
-  particle-sim \
-  uvicorn api.main:app --host 0.0.0.0 --port 8000
-```
-
----
-
-### 5. Run simulation
-
-```bash
-xhost +local:docker
-
-docker run -it \
-  --env DISPLAY=$DISPLAY \
-  --env PYTHONPATH=/app \
-  --volume /tmp/.X11-unix:/tmp/.X11-unix \
-  --volume $(pwd):/app \
-  particle-sim \
-  python simulation/main.py
-```
+⚠️ The first run may take a few minutes due to data generation and model training.
 
 ---
 

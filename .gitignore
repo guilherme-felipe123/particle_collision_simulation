@@ -1,3 +1,19 @@
-__pycache__
-events.jsonl
-.venv
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+.venv/
+
+# Logs
+logs.txt
+*.log
+
+# Data
+data/events.jsonl
+
+# Models
+*.pth
+
+# OS
+.DS_Store

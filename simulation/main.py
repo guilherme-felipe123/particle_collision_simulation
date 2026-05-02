@@ -1,4 +1,5 @@
 import math
+import time
 import torch
 import pygame
 import random
@@ -6,27 +7,35 @@ import requests
 import itertools
 
 from particle import Particle
-from genarate_data import main
 from physics import check_collision
 from detector.detector import Detector
-from data.dataset import DatasetWriter
 from ml.deepset_model import DeepSetModel
 from ml.preprocess import extract_features
-
-
 
 
 def get_prediction(particles):
     url = "http://localhost:8000/predict"
 
-    response = requests.post(url, json={
-        "particles": particles
-    })
+    try:
+        start = time.time()
 
-    print("STATUS:", response.status_code)
-    print("RESPONSE:", response.text)
+        response = requests.post(url, json={
+            "particles": particles
+        }, timeout=2)
 
-    return response.json()["predicted_particles"]
+        latency = time.time() - start
+
+        data = response.json()
+
+        if "predicted_particles" not in data:
+            print("API ERROR:", data)
+            return 0, latency
+
+        return data["predicted_particles"], latency
+
+    except Exception as e:
+        print("Connection error:", e)
+        return 0, 0
 
 def get_speed(p):
     return math.hypot(p.vx, p.vy)
@@ -34,6 +43,50 @@ def get_speed(p):
 def get_angle(p1, p2):
     return math.degrees(math.atan2(p2.y - p1.y, p2.x - p1.x))
 
+def normalize(particles):
+    return [[p[0]/5, p[1]/5, p[2]/5] for p in particles]
+
+def handle_collision(detector):
+    true_particles = []
+
+    n_particles = random.randint(4, 12)
+    particles = []
+
+    for _ in range(n_particles):
+        angle = random.uniform(0, 2 * math.pi)
+        speed = random.uniform(1, 4)
+
+        vx = math.cos(angle) * speed
+        vy = math.sin(angle) * speed
+
+        particle = Particle(400, 300, vx, vy, radius=4)
+        particles.append(particle)
+
+        true_particles.append({
+            "px": vx,
+            "py": vy,
+            "energy": math.hypot(vx, vy)
+        })
+
+    true_event = {
+        "n_particles": len(true_particles),
+        "particles": true_particles
+    }
+
+    measured_event = detector.observe(true_event)
+
+    x = [[p["px"], p["py"], p["energy"]] for p in measured_event["particles"]]
+
+    return particles, true_event, x
+
+def predict_and_log(x, log_counter):
+    prediction, latency = get_prediction(x)
+
+    if log_counter % 30 == 0:
+        with open("logs.txt", "a") as f:
+            f.write(f"{prediction},{latency}\n")
+
+    return prediction, latency
 
 pygame.init()
 
@@ -58,9 +111,6 @@ event_active = False
 
 frame_count = 0
 
-writer = DatasetWriter()
-
-#main()
 
 while running:
     screen.fill((0, 0, 0))
@@ -88,58 +138,9 @@ while running:
                 event_active = True
                 frame_count = 0
 
-                # compute event
-                v1 = get_speed(p1)
-                v2 = get_speed(p2)
-                angle = get_angle(p1, p2)
+                particles, true_event, x = handle_collision(detector)
 
-                particles = []
-
-                # create explosion
-                true_particles = []
-
-                n_particles = random.randint(4, 12)
-
-                for _ in range(n_particles):
-                    angle = random.uniform(0, 2 * math.pi)
-                    speed = random.uniform(1, 4)
-
-                    vx = math.cos(angle) * speed
-                    vy = math.sin(angle) * speed
-
-                    particle = Particle(
-                        x=400,
-                        y=300,
-                        vx=vx,
-                        vy=vy,
-                        radius=4
-                    )
-
-                    particles.append(particle)
-
-                    # ✅ collect physics data
-                    true_particles.append({
-                        "px": vx,
-                        "py": vy,
-                        "energy": math.hypot(vx, vy)
-                    })
-
-                true_event = {
-                    "n_particles": len(true_particles),
-                    "particles": true_particles
-                }
-
-                measured_event = detector.observe(true_event)
-
-                # prepare input for model
-                measured_particles = measured_event["particles"]
-
-
-                x = [[p["px"], p["py"], p["energy"]] for p in measured_particles]
-
-                # call API
-                print("X Contents: ",x)
-                prediction = get_prediction(x)
+                prediction, latency = predict_and_log(x, frame_count)
 
                 pred_particles = prediction * 20
                 pred_particles = max(0, min(pred_particles, 20))
@@ -147,7 +148,7 @@ while running:
                 true_n = true_event["n_particles"]
 
                 print(f"TRUE: {true_n}")
-                print(f"PREDICTED: {pred_particles:.2f}")
+                print(f"Prediction: {pred_particles:.3f} | Latency: {latency:.3f}s")
 
                 break
 
