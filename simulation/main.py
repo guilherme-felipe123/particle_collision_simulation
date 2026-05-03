@@ -1,4 +1,5 @@
 import math
+import json
 import time
 import torch
 import pygame
@@ -42,9 +43,6 @@ def get_speed(p):
 
 def get_angle(p1, p2):
     return math.degrees(math.atan2(p2.y - p1.y, p2.x - p1.x))
-
-def normalize(particles):
-    return [[p[0]/5, p[1]/5, p[2]/5] for p in particles]
 
 def handle_collision(detector):
     true_particles = []

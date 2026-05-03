@@ -11,6 +11,7 @@ logs.txt
 
 # Data
 data/events.jsonl
+*.json
 
 # Models
 *.pth
