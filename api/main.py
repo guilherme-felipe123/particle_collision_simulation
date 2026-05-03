@@ -5,18 +5,15 @@ from typing import List
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from ml.normalizer import Normalizer
 from ml.deepset_model import DeepSetModel
 
 app = FastAPI()
 
-with open("ml/normalization.json") as f:
-    stats = json.load(f)
 
-mean = torch.tensor(stats["mean"])
-std = torch.tensor(stats["std"])
+normalizer = Normalizer()
+normalizer.load("ml/normalization.json")
 
-mean = mean.float()
-std = std.float()
 
 # Load model once (important)
 model = DeepSetModel()
@@ -37,7 +34,7 @@ def predict(data: ParticlesInput):
     x = torch.tensor([data.particles], dtype=torch.float32)
 
     with torch.no_grad():
-        x = (x - mean) / (std + 1e-8)
+        x = normalizer.transform(x)
 
         prediction = model(x)
         prediction = prediction.item()
