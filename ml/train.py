@@ -22,6 +22,8 @@ def get_next_version():
 
 def train():
     dataset_path = "data/events.jsonl"
+    model_dir = "ml/models"
+    os.makedirs(model_dir, exist_ok=True)
 
     if not os.path.exists(dataset_path):
         print("⚠️ Dataset not found. Generating...")
