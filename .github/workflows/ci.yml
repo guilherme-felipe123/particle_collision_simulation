@@ -2,29 +2,29 @@ name: CI - ML Service
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Build containers
         run: |
-          docker build -t particle-sim .
+          docker compose build --no-cache
 
-      - name: Run training (sanity check)
+      - name: Run training
         run: |
-          docker run --rm -e PYTHONPATH=/app particle-sim python -m ml.train
+          docker compose run --rm trainer
 
-      - name: Test API startup
+      - name: Start API
         run: |
-          docker run --rm -d -p 8000:8000 -e PYTHONPATH=/app particle-sim \
-          python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
-          sleep 5
-          curl -f http://localhost:8000 || exit 1
+          docker compose up -d api
+          sleep 10
+          docker compose logs api
+          curl -f http://localhost:8001 || exit 1
