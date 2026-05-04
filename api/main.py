@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from ml.normalizer import Normalizer
 from ml.deepset_model import DeepSetModel
+from ml.model_manager import load_best_model
 
 app = FastAPI()
 
@@ -17,7 +18,7 @@ normalizer.load("ml/normalization.json")
 
 # Load model once (important)
 model = DeepSetModel()
-model.load_state_dict(torch.load("ml/model.pth", map_location="cpu"))
+model = load_best_model(model)
 model.eval()
 
 class ParticlesInput(BaseModel):
