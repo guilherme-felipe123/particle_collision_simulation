@@ -1,0 +1,16 @@
+services:
+  trainer:
+    image: particle-sim
+    volumes:
+      - .:/app
+    command: python -m ml.train
+
+  api:
+    image: particle-sim
+    depends_on:
+      - trainer
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000

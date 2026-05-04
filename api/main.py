@@ -13,7 +13,12 @@ app = FastAPI()
 
 
 normalizer = Normalizer()
-normalizer.load("ml/normalization.json")
+
+try:
+    normalizer.load("ml/normalization.json")
+except FileNotFoundError:
+    print("⚠️ normalization not found, model not ready")
+
 
 
 # Load model once (important)
