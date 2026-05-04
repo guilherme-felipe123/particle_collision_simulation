@@ -21,7 +21,15 @@ def get_next_version():
     return data["latest_version"] + 1
 
 def train():
-    dataset = CollisionDataset("data/events.jsonl")
+    dataset_path = "data/events.jsonl"
+
+    if not os.path.exists(dataset_path):
+        print("⚠️ Dataset not found. Generating...")
+        from simulation.generate_data import main
+        main(n_events=5000)
+
+    dataset = CollisionDataset(dataset_path)
+
     loader = DataLoader(
         dataset,
         batch_size=32,

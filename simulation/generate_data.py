@@ -29,13 +29,11 @@ def generate_event():
     return true_event
 
 
-def main():
+def main(n_events=1000):
     detector = Detector(noise_level=0.1)
     writer = DatasetWriter()
 
-    N_EVENTS = 1000
-
-    for i in range(N_EVENTS):
+    for i in range(n_events):
         true_event = generate_event()
         measured_event = detector.observe(true_event)
 
