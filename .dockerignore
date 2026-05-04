@@ -8,10 +8,6 @@ __pycache__
 .venv
 venv/
 
-data/
-ml/models/
-notebooks/
-
 *.pt
 *.pth
 

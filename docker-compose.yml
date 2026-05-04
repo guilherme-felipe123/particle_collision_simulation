@@ -1,11 +1,15 @@
 services:
   trainer:
+    build:
+      context: .
     image: particle-sim
     volumes:
       - .:/app
     command: python -m ml.train
 
   api:
+    build:
+      context: .
     image: particle-sim
     depends_on:
       - trainer
