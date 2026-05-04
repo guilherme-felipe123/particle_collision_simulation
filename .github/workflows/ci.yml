@@ -9,24 +9,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-
-    - name: Run basic check (import test)
-      run: |
-        python -c "import torch; import fastapi; print('Imports OK')"
-
-    - name: Build Docker image
-      run: |
-        docker build -t particle-sim .
+      - name: Checkout repository
+        uses: actions/checkout@v3
+    
+      - name: Build Docker image
+        run: |
+          docker build -t particle-sim .
+    
+      - name: Run training (sanity check)
+        run: |
+          docker run --rm particle-sim python -m ml.train
+    
+      - name: Test API startup
+        run: |
+          docker run --rm -d -p 8000:8000 particle-sim python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+          sleep 5
+          curl -f http://localhost:8000 || exit 1
+    
