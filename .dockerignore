@@ -10,5 +10,6 @@ venv/
 
 *.pt
 *.pth
+*json
 
 node_modules/
